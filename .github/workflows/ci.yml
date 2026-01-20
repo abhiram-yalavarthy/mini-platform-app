@@ -39,9 +39,10 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image
-        env:
-          ECR_REPO: ${{ secrets.ECR_REPO }}
-          IMAGE_TAG: sha-${{ github.sha }}
-        run: |
-          docker build -f api/Dockerfile -t $ECR_REPO:$IMAGE_TAG .
-          docker push $ECR_REPO:$IMAGE_TAG
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: api/Dockerfile
+          push: true
+          tags: ${{ secrets.ECR_REPO }}:sha-${{ github.sha }}
+
