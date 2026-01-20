@@ -46,3 +46,16 @@ jobs:
           push: true
           tags: ${{ secrets.ECR_REPO }}:sha-${{ github.sha }}
 
+      - name: Debug: check ECR_REPO secret format (safe)
+        run: |
+          s="${{ secrets.ECR_REPO }}"
+          if [ -z "$s" ]; then
+            echo "ECR_REPO is EMPTY"; exit 1
+          fi
+          # print length only (safe)
+          len=$(printf '%s' "$s" | wc -c)
+          echo "ECR_REPO length: $len"
+          # detect newline or space (safe detection only)
+          if printf '%s' "$s" | grep -q $'\n'; then echo "ECR_REPO contains NEWLINE"; else echo "ECR_REPO has NO NEWLINE"; fi
+          if printf '%s' "$s" | grep -q ' '; then echo "ECR_REPO contains SPACE"; else echo "ECR_REPO has NO SPACE"; fi
+
