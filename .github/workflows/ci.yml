@@ -37,6 +37,16 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
+      - name: Debug: check ECR_REPO secret format (safe)
+        run: |
+          s="${{ secrets.ECR_REPO }}"
+          if [ -z "$s" ]; then
+            echo "ECR_REPO is EMPTY"; exit 1
+          fi
+          len=$(printf '%s' "$s" | wc -c)
+          echo "ECR_REPO length: $len"
+          if printf '%s' "$s" | grep -q $'\n'; then echo "ECR_REPO contains NEWLINE"; else echo "ECR_REPO has NO NEWLINE"; fi
+          if printf '%s' "$s" | grep -q ' '; then echo "ECR_REPO contains SPACE"; else echo "ECR_REPO has NO SPACE"; fi
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
