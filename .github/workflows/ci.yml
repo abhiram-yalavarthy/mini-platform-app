@@ -37,6 +37,7 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
+
       - name: Debug: check ECR_REPO secret format (safe)
         run: |
           s="${{ secrets.ECR_REPO }}"
@@ -50,22 +51,10 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
+        env:
+          IMAGE_TAG: sha-${{ github.sha }}
         with:
           context: .
           file: api/Dockerfile
           push: true
-          tags: ${{ secrets.ECR_REPO }}:sha-${{ github.sha }}
-
-      - name: Debug: check ECR_REPO secret format (safe)
-        run: |
-          s="${{ secrets.ECR_REPO }}"
-          if [ -z "$s" ]; then
-            echo "ECR_REPO is EMPTY"; exit 1
-          fi
-          # print length only (safe)
-          len=$(printf '%s' "$s" | wc -c)
-          echo "ECR_REPO length: $len"
-          # detect newline or space (safe detection only)
-          if printf '%s' "$s" | grep -q $'\n'; then echo "ECR_REPO contains NEWLINE"; else echo "ECR_REPO has NO NEWLINE"; fi
-          if printf '%s' "$s" | grep -q ' '; then echo "ECR_REPO contains SPACE"; else echo "ECR_REPO has NO SPACE"; fi
-
+          tags: ${{ secrets.ECR_REPO }}:${{ env.IMAGE_TAG }}
